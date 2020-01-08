@@ -19,6 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  shared_preferences: ^0.5.6
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -26,7 +27,16 @@ dependencies:
 
   openapi:
     git: https://github.com/Tiatzi/nfc-openapi-dart-client.git
-
+  # https://github.com/Norbert515/dynamic_theme easy way of dynamically changing themes
+  dynamic_theme: ^1.0.1
+  flutter_nfc_reader: ^0.1.0
+  permission_handler: ^4.0.0
+  uuid: 2.0.4
+  qr_flutter: ^3.2.0
+  dartz: ^0.8.9
+  http: ^0.12.0
+  progress_button: ^0.0.2
+  tuple: ^1.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

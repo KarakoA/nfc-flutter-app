@@ -1,28 +1,36 @@
+import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nfc_app/home_page.dart';
-
-import 'list_page.dart';
+import 'package:flutter_nfc_app/admin/admin_detail_page.dart';
+import 'package:flutter_nfc_app/admin/admin_home_page.dart';
+import 'package:flutter_nfc_app/user/home_page.dart';
+import 'package:flutter_nfc_app/login_page.dart';
+import 'package:flutter_nfc_app/user/user_qr_page.dart';
+import 'package:flutter_nfc_app/user/user_page.dart';
+import 'user/list_page.dart';
 
 void main() => runApp(
-      MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or simply save your changes to "hot reload" in a Flutter IDE).
-          // Notice that the counter didn't reset back to zero; the application
-          // is not restarted.
-          primarySwatch: Colors.lightBlue,
+      DynamicTheme(
+        data: (brightness) => new ThemeData(primarySwatch: Colors.lightBlue),
+        themedWidgetBuilder: (context, theme) => MaterialApp(
+          title: 'Flutter Demo',
+          initialRoute: '/',
+          theme: theme,
+          routes: {
+            '/': (BuildContext context) => LoginPage(),
+            HomePage.routeName: (BuildContext context) =>
+                HomePage(title: 'Aristotelessteig'),
+            ListPage.routeName: (BuildContext context) =>
+                new ListPage(title: "Available Machines"),
+            AdminHomePage.routeName: (BuildContext context) =>
+                AdminHomePage(title: 'Admin'),
+            //TODO also for others
+            AdminDetailPage.routeName: (BuildContext context) =>
+                AdminDetailPage(title: 'Card Details'),
+            UserQrPage.routeName: (BuildContext context) =>
+                UserQrPage(title: "QR-Code"),
+            UserPage.routeName: (BuildContext context) =>
+                UserPage(title: "Account"),
+          },
         ),
-        initialRoute: '/',
-        routes: {
-          '/': (BuildContext context) => HomePage(title: 'Laundry Room App'),
-          '/list': (BuildContext context) =>
-              new ListPage(title: "Available Machines")
-        },
       ),
     );
