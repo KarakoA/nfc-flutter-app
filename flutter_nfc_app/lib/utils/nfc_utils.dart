@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:flutter_easy_nfc/flutter_easy_nfc.dart';
+//import 'package:flutter_easy_nfc/flutter_easy_nfc.dart';
 
 class NFCUtils {
   static const platform =
       const MethodChannel('de.htw.nfc.flutter_nfc_app.readCard');
+ // platform.setMethodCallHandler(_handleMethod);
 
   static Future<String> readCardId() async {
     final int result = await platform.invokeMethod('getBatteryLevel');
@@ -16,7 +17,7 @@ class NFCUtils {
   }
 
   static Future<String> writeTag(String uuid) async {
-    var isEnabled = await FlutterEasyNfc.isEnabled();
+  /*  var isEnabled = await FlutterEasyNfc.isEnabled();
     if (!isEnabled) {
       await FlutterEasyNfc.startup();
     }
@@ -51,11 +52,11 @@ class NFCUtils {
     });
     var a = await sc.stream.first;
     sc.close();
-    return a;
+    return a;*/
   }
 
   Future<String> readTag() {
-    FlutterEasyNfc.onNfcEvent((NfcEvent event) async {
+  /*  FlutterEasyNfc.onNfcEvent((NfcEvent event) async {
       if (event.tag is MifareClassic) {
         MifareClassic m1 = event.tag;
         await m1.connect();
@@ -66,7 +67,7 @@ class NFCUtils {
         print(await m1.readBlock(3));
         await m1.close();
       }
-    });
+    });*/
   }
 
 //  static void readCardId(NfcData data) {

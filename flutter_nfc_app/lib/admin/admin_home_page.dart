@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_app/admin/admin_detail_page.dart';
 import 'package:flutter_nfc_app/admin/admin_link_card_page.dart';
-import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
+//import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:http/http.dart';
 import 'package:openapi/api.dart';
 
@@ -73,14 +73,15 @@ class _AdminHomePageState extends State<AdminHomePage> {
 //TODO overlapping possible if its like this
   //TODO here tests
   void readTag() {
-    FlutterNfcReader.read().then(onTagRead);
+   // FlutterNfcReader.read().then(onTagRead);
   }
 
   //TODO
+  /*
   String extractCardId(NfcData data) {
     return data.id;
-  }
-
+  }*/
+/*
   void onTagRead(NfcData data) async {
     var cardId = extractCardId(data);
     try {
@@ -129,5 +130,5 @@ class _AdminHomePageState extends State<AdminHomePage> {
     } catch (e) {
       print("Exception when calling UserApi->userLinkCard: $e\n");
     }
-  }
+  }*/
 }
