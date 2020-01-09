@@ -1,8 +1,20 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_easy_nfc/flutter_easy_nfc.dart';
 
 class NFCUtils {
+  static const platform =
+      const MethodChannel('de.htw.nfc.flutter_nfc_app.readCard');
+
+  static Future<String> readCardId() async {
+    final int result = await platform.invokeMethod('getBatteryLevel');
+    var batteryLevel = 'Battery level at $result % .';
+    return batteryLevel;
+    //final int result = await platform.invokeMethod(
+    //    'readCard', <String, String>{'url': "https://flutter.dev"});
+  }
+
   static Future<String> writeTag(String uuid) async {
     var isEnabled = await FlutterEasyNfc.isEnabled();
     if (!isEnabled) {
