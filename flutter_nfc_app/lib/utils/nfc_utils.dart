@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-//import 'package:flutter_easy_nfc/flutter_easy_nfc.dart';
 
 class NFCUtils {
+
+
   static const platform =
       const MethodChannel('de.htw.nfc.flutter_nfc_app.readCard');
  // platform.setMethodCallHandler(_handleMethod);

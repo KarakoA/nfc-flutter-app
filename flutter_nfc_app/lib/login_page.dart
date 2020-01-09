@@ -72,31 +72,33 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ));
     return Scaffold(
-      body: Center(
-        child: Container(
-          color: Colors.white,
-          child: Padding(
-            padding: EdgeInsets.all(32.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  "Aristeig Washing",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 24, color: Theme.of(context).primaryColorDark),
-                ),
-                icon,
-                SizedBox(height: 16.0),
-                userField,
-                SizedBox(height: 16.0),
-                passwordField,
-                SizedBox(height: 32.0),
-                loginButton,
-                SizedBox(height: 16.0),
-                registerButton,
-              ],
+      body: SingleChildScrollView(
+        child: Center(
+          child: Container(
+            color: Colors.white,
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    "Aristeig Washing",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 24, color: Theme.of(context).primaryColorDark),
+                  ),
+                  icon,
+                  SizedBox(height: 16.0),
+                  userField,
+                  SizedBox(height: 16.0),
+                  passwordField,
+                  SizedBox(height: 32.0),
+                  loginButton,
+                  SizedBox(height: 16.0),
+                  registerButton,
+                ],
+              ),
             ),
           ),
         ),

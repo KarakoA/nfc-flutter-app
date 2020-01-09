@@ -1,9 +1,11 @@
 import 'package:dartz/dartz.dart';
-//import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
+import 'package:flutter/services.dart';
 import 'package:openapi/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Utils {
+  static const platform = const MethodChannel('de.htw.nfc.flutter_nfc_app.readCard');
+
   static const _userIdPrefsKey = "userIdKey";
 
   static void saveUserIdToPreferences(String userId) async {
@@ -38,5 +40,4 @@ class Utils {
     var result = await loadPrefsUserFromAPIEither();
     return result.toOption().getOrElse(() => User());
   }
-
 }

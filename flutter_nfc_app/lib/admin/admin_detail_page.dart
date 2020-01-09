@@ -34,7 +34,6 @@ class _AdminDetailPageState extends State<AdminDetailPage> {
         builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
           if (snapshot.hasData) {
             var user = snapshot.data;
-            _newBalance = user.balance;
             return _buildContent(user);
           } else
             return Center(child: CircularProgressIndicator());
@@ -44,10 +43,12 @@ class _AdminDetailPageState extends State<AdminDetailPage> {
   }
 
   Future<User> load() async {
-    final String userId = ModalRoute.of(context).settings.arguments;
-    try {
+     try {
       var apiInstance = UserApi();
-      User user = await apiInstance.getUserById(userId);
+      //TODO swagger is crazy on this one
+//      User user = await apiInstance.getUserById(widget.userId);
+       User user = await apiInstance.getUserById("1234");
+       _newBalance = user.balance;
       return user;
     } catch (e) {
       print("Exception when calling UserApi->getUserById: $e\n");

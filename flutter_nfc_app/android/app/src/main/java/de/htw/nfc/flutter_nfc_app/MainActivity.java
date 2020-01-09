@@ -2,6 +2,7 @@ package de.htw.nfc.flutter_nfc_app;
 
 import android.app.PendingIntent;
 import android.nfc.tech.MifareClassic;
+import android.os.ResultReceiver;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -9,6 +10,8 @@ import android.os.Parcelable;
 import android.nfc.*;
 
 import androidx.annotation.NonNull;
+import de.htw.nfc.flutter_nfc_app.utils.NFCUtils;
+import de.htw.nfc.flutter_nfc_app.utils.Utils;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodChannel;
@@ -27,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class MainActivity extends FlutterActivity {
     private static final String CHANNEL = "de.htw.nfc.flutter_nfc_app.readCard";
@@ -138,145 +142,40 @@ public class MainActivity extends FlutterActivity {
         processIntent(intent);
     }
 
+    final String keyBHexString = "ABCDEF123456";
+
     private void processIntent(Intent intent) {
-
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction())) {
-
             Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            MifareClassic mifareTag = MifareClassic.get(tag);
 
-            //     writeTag(mifareTag, "ABCDEF123456", "ABCD0000000000000000000000000000");
-            readTag(mifareTag,"ABCDEF123456");
-             channel.invokeMethod("message", "Hello from native host");
-        }
-
-    }
-    private String readTag(MifareClassic tag, String keyBHexString){
-        byte[] keyB = hexStringToByteArray(keyBHexString);
-        try {
-            tag.connect();
-            int sectorIndex =1;
-                if(tag.authenticateSectorWithKeyB(sectorIndex,keyB)) {
-                    //0-th block of sector 1
-                    byte[] resultBytes = tag.readBlock(4);
-                    Log.i("[NFC-READ]", "success");
-                    String result=bytesToHex(resultBytes);
-                    return result;
+            channel.invokeMethod("discovered","", new MethodChannel.Result() {
+                @Override
+                public void success(Object result) {
+                    String command = (String) result;
+                    if (command.equals("read")) {
+                        String tagId = NFCUtils.readTag(tag, keyBHexString);
+                        channel.invokeMethod("operationDone", tagId);
+                    } else if (command.equals("write")) {
+                        UUID uuid = java.util.UUID.randomUUID();
+                        String s = uuid.toString();
+                        byte[] arr=Utils.hexStringToByteArray(s);
+                        boolean success = NFCUtils.writeTag(tag, keyBHexString, "ABCD0000000000000000000000000000");
+                        channel.invokeMethod("operationDone", success);
+                    } else
+                        throw new IllegalStateException();
                 }
 
-            tag.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            try {
-                tag.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            Log.e("taEg", e.getLocalizedMessage());
-        }
-        return "";
-    }
-    private void writeTag(MifareClassic tag, String keyBHexString, String uuidHexString) {
-
-        byte[] keyA = MifareClassic.KEY_DEFAULT;
-        byte[] keyB = hexStringToByteArray(keyBHexString);
-        byte[] accessBits = hexStringToByteArray("0F00FFFF");
-
-        byte[] data = concatAll(keyA, accessBits, keyB);
-        byte[] uuid = hexStringToByteArray(uuidHexString);
-        boolean auth = false;
-        // 5.2) and get the number of sectors this card has..and loop thru these sectors
-        int secCount = tag.getSectorCount();
-        int bCount = 0;
-        int bIndex = 0;
-        try {
-            tag.connect();
-            int sectorIndex =1;
-            if(tag.authenticateSectorWithKeyA(sectorIndex, MifareClassic.KEY_DEFAULT)) {
-
-                    //change the access bits and key
-//                    tag.writeBlock(7,data);
-                    if(tag.authenticateSectorWithKeyB(sectorIndex,keyB)) {
-                        //0-th block of sector 1
-                        tag.writeBlock(4,uuid );
-                        Log.i("[NFC-WRITE]", "success");
-                    }
-
-
-            }
-            tag.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            try {
-                tag.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            Log.e("taEg", e.getLocalizedMessage());
-        }
-
-        try {
-            tag.connect();
-            for (int j = 0; j < secCount; j++) {
-                // 6.1) authenticate the sector
-                auth = tag.authenticateSectorWithKeyA(j, MifareClassic.KEY_DEFAULT);
-                if (auth) {
-                    // 6.2) In each sector - get the block count
-                    bCount = tag.getBlockCountInSector(j);
-                    bIndex = 0;
-                    for (int i = 0; i < bCount; i++) {
-                        bIndex = tag.sectorToBlock(j);
-                        // 6.3) Read the block
-                        data = tag.readBlock(bIndex);
-                        // 7) Convert the data into a string from Hex format.
-                        Log.i("tag", Arrays.toString(data));
-                        bIndex++;
-                    }
-                } else { // Authentication failed - Handle it
+                @Override
+                public void error(String errorCode, String errorMessage, Object errorDetails) {
 
                 }
 
-            }
-        }catch (IOException e) {
-            Log.e("tag", e.getLocalizedMessage());
-            //showAlert(3);
-        };
-    }
-    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
-    public static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        }
-        return new String(hexChars);
-    }
+                @Override
+                public void notImplemented() {
 
-    //Helper functions
-    public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+                }
+            });
         }
-
-        return data;
-    }
-
-    public static byte[] concatAll(byte[] first, byte[]... rest) {
-        int totalLength = first.length;
-        for (byte[] array : rest) {
-            totalLength += array.length;
-        }
-        byte[] result = Arrays.copyOf(first, totalLength);
-        int offset = first.length;
-        for (byte[] array : rest) {
-            System.arraycopy(array, 0, result, offset, array.length);
-            offset += array.length;
-        }
-        return result;
     }
 
 }

@@ -1,12 +1,6 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-//import 'package:flutter_easy_nfc/flutter_easy_nfc.dart';
-import 'package:flutter_nfc_app/utils/nfc_utils.dart';
-//import 'package:nfc_manager/nfc_manager.dart';
-//import 'package:nfc_manager/platform_tags.dart';
 import 'package:openapi/api.dart';
 
 import '../widgets/reserve_machine_widget.dart';
@@ -23,25 +17,12 @@ class ListPage extends StatefulWidget {
 }
 
 class _ListPageState extends State<ListPage> {
-  var platform = const MethodChannel('de.htw.nfc.flutter_nfc_app.readCard');
 
   List<Machine> items;
-
-  Future _handleMethod(MethodCall call) {
-    switch (call.method) {
-      case "message":
-        setState(() {
-          items = [];
-        });
-    }
-  }
 
   @override
   void initState() {
     super.initState();
-    log('data:asda');
-    platform.setMethodCallHandler(_handleMethod);
-
     loadData();
   }
 
@@ -92,35 +73,9 @@ class _ListPageState extends State<ListPage> {
         trailing: ReserveMachineWidget(machine: currentItem));
   }
 
-  void onReserve(Machine machine) {}
-/*
-  void _onTagDiscovered(NfcTag tag) {
-    var a = tag.data;
-    var miFareTag = MiFare.fromTag(tag);
-    //miFareTag
-    if (miFareTag != null) {
-      setState(() {
-        items = [];
-      });
-    }
-  }
-
-  void f(NfcEvent<BasicTagTechnology> event) {
-    setState(() {});
-  }
-*/
   Future<void> loadData() async {
-    try {
-//      var a = await NFCUtils.readCardId();
 
-      //var start = await FlutterEasyNfc.startup();
-      //F//lutterEasyNfc.onNfcEvent(f); //;(event) {
-
-    } catch (err) {
-      print(err);
-    }
     try {
-      var a = await NFCUtils.readCardId();
       var apiClient = MachineApi();
       var machines = await apiClient.listAvailableMachines();
       machines.sort((a, b) =>
@@ -129,8 +84,7 @@ class _ListPageState extends State<ListPage> {
         items = machines.where((x) => x.type != "Dryer").toList();
       });
     } catch (e) {
-      //Scaffold.of(context).showSnackBar(new SnackBar(content: Text(e)));
-      setState(() {
+          setState(() {
         items = [];
       });
     }

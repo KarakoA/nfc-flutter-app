@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:dynamic_theme/dynamic_theme.dart';
@@ -7,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nfc_app/user/list_page.dart';
 import 'package:flutter_nfc_app/user/user_qr_page.dart';
 import 'package:flutter_nfc_app/utils/utils.dart';
-import 'package:hex/hex.dart';
 import 'package:openapi/api.dart';
 import 'package:tuple/tuple.dart';
 
@@ -26,9 +24,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    var data = HEX.decode("12ABCD");
-
-    var a=data.toString();
     _streamController = StreamController();
     load();
     super.initState();

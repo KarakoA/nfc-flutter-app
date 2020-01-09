@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_nfc_app/admin/admin_detail_page.dart';
-import 'package:flutter_nfc_app/admin/admin_link_card_page.dart';
-//import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
+import 'package:flutter_nfc_app/admin/admin_register_card_page.dart';
+import 'package:flutter_nfc_app/utils/utils.dart';
+
 import 'package:http/http.dart';
 import 'package:openapi/api.dart';
 
@@ -18,14 +20,25 @@ class AdminHomePage extends StatefulWidget {
 }
 
 class _AdminHomePageState extends State<AdminHomePage> {
+
   @override
   void initState() {
     super.initState();
+    Utils.platform.setMethodCallHandler(_handleMethod);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      Utils.platform.setMethodCallHandler(_handleMethod);
+    }
+    if (state == AppLifecycleState.paused) {
+      Utils.platform.setMethodCallHandler(null);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    readTag();
     return Scaffold(
       drawer: Drawer(
           child: ListView(padding: EdgeInsets.zero, children: <Widget>[
@@ -36,9 +49,10 @@ class _AdminHomePageState extends State<AdminHomePage> {
           ),
         ),
         ListTile(
-          title: Text('Link Card'),
+          title: Text('Write new Card ID'),
           onTap: () {
-//            Navigator.pushNamed(context, ListPage.routeName);
+            Navigator.pop(context);
+            Navigator.pushNamed(context, AdminRegisterCardPage.routeName);
           },
         ),
         ListTile(
@@ -64,33 +78,27 @@ class _AdminHomePageState extends State<AdminHomePage> {
         ],
       ),
     );
-
-    // link card with user
-    // setup machines
-    //
   }
 
-//TODO overlapping possible if its like this
-  //TODO here tests
-  void readTag() {
-   // FlutterNfcReader.read().then(onTagRead);
+  Future<String> _handleMethod(MethodCall call) async {
+    switch (call.method) {
+      case "discovered":
+        return "read";
+      case "operationDone":
+        String cardId = call.arguments;
+        onTagRead(cardId);
+        return "";
+    }
+    return "";
   }
 
-  //TODO
-  /*
-  String extractCardId(NfcData data) {
-    return data.id;
-  }*/
-/*
-  void onTagRead(NfcData data) async {
-    var cardId = extractCardId(data);
+  void onTagRead(String cardId) async {
     try {
       var apiInstance = UserApi();
       Response response = await apiInstance.getUserByCardIdWithHttpInfo(cardId);
 
-      //TODO Swap codes back
       //card found, go to details
-      if (response.statusCode == 404) {
+      if (response.statusCode == 200) {
         var userId = response.body;
         Navigator.push(
           context,
@@ -101,7 +109,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
         );
       }
       //could not find the card, go into "link" mode
-      if (response.statusCode == 200) {
+      if (response.statusCode == 404) {
         await _onLinkCard(cardId);
       }
     } catch (e) {
@@ -130,5 +138,5 @@ class _AdminHomePageState extends State<AdminHomePage> {
     } catch (e) {
       print("Exception when calling UserApi->userLinkCard: $e\n");
     }
-  }*/
+  }
 }
