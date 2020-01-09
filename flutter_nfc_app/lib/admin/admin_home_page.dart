@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_app/admin/admin_detail_page.dart';
+import 'package:flutter_nfc_app/admin/admin_link_card_page.dart';
 import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
+import 'package:http/http.dart';
+import 'package:openapi/api.dart';
 
-import '../user/list_page.dart';
+import 'package:qrscan/qrscan.dart' as scanner;
 
 class AdminHomePage extends StatefulWidget {
   static const routeName = "admin/home";
@@ -35,10 +38,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
         ListTile(
           title: Text('Link Card'),
           onTap: () {
-            // Update the state of the app
-            // ...
-            // Then close the drawer
-            Navigator.pushNamed(context, ListPage.routeName);
+//            Navigator.pushNamed(context, ListPage.routeName);
           },
         ),
         ListTile(
@@ -47,12 +47,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
         ),
       ])),
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.ac_unit),
-          onPressed: () => Navigator.pushNamed(
-              context, AdminDetailPage.routeName,
-              arguments: "55"),
-        ),
         title: Text(widget.title),
       ),
       body: Stack(
@@ -72,8 +66,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
 
     // link card with user
-    // add funds
-    // deduce funds
     // setup machines
     //
   }
@@ -84,18 +76,58 @@ class _AdminHomePageState extends State<AdminHomePage> {
     FlutterNfcReader.read().then(onTagRead);
   }
 
-  void onTagRead(NfcData data) {
-    //TODO find userId by tagId
-    //if not found
-    // empty card, show scan page
+  //TODO
+  String extractCardId(NfcData data) {
+    return data.id;
+  }
 
-    // if found
-//    continue as before
-    /*
-      Navigator.pushNamed(
-        context, AdminDetailPage.routeName,
-        arguments: response.id
-        }
-        */
+  void onTagRead(NfcData data) async {
+    var cardId = extractCardId(data);
+    try {
+      var apiInstance = UserApi();
+      Response response = await apiInstance.getUserByCardIdWithHttpInfo(cardId);
+
+      //TODO Swap codes back
+      //card found, go to details
+      if (response.statusCode == 404) {
+        var userId = response.body;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                AdminDetailPage(title: "Details", userId: userId),
+          ),
+        );
+      }
+      //could not find the card, go into "link" mode
+      if (response.statusCode == 200) {
+        await _onLinkCard(cardId);
+      }
+    } catch (e) {
+      //fail silently
+      e.print("Exception when calling UserApi->getUserByCardId: $e\n");
+    }
+  }
+
+  Future<void> _onLinkCard(String cardId) async {
+    try {
+      var userId = await scanner.scan();
+      var apiInstance = UserApi();
+      apiInstance.userLinkCard(userId, cardId);
+      await Scaffold.of(context)
+          .showSnackBar(
+            new SnackBar(
+              content: Text(
+                "Success",
+                textAlign: TextAlign.center,
+              ),
+              duration: Duration(seconds: 3),
+            ),
+          )
+          .closed;
+      Navigator.pop(context);
+    } catch (e) {
+      print("Exception when calling UserApi->userLinkCard: $e\n");
+    }
   }
 }

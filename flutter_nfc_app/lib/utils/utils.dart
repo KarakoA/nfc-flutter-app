@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:openapi/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -37,4 +38,5 @@ class Utils {
     var result = await loadPrefsUserFromAPIEither();
     return result.toOption().getOrElse(() => User());
   }
+
 }

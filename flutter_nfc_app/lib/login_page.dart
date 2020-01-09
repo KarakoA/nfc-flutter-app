@@ -8,7 +8,7 @@ import 'package:http/http.dart';
 import 'package:openapi/api.dart';
 
 class LoginPage extends StatefulWidget {
-  static const routeName = "/login";
+  static const routeName = "/";
   static const usernameSharedPrefsKey = "usernameKey";
 
   @override

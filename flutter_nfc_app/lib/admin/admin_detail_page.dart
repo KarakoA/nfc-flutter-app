@@ -4,92 +4,80 @@ import 'package:openapi/api.dart';
 class AdminDetailPage extends StatefulWidget {
   static const routeName = "admin/details";
 
-  AdminDetailPage({Key key, this.title}) : super(key: key);
+  AdminDetailPage({Key key, this.title, this.userId}) : super(key: key);
   final String title;
+  final String userId;
 
   @override
   State<StatefulWidget> createState() => _AdminDetailPageState();
 }
 
 class _AdminDetailPageState extends State<AdminDetailPage> {
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool _isLoading = true;
-  User _user = User();
   double _newBalance = 0;
-
-  String _balanceDisplay() => (_newBalance?.toString() ?? "") + " €";
-
-  String _cardIdDisplay() => "User ID: ${_user?.id ?? ""}";
-
-  bool newBalanceIsHigher() =>
-      (_newBalance != null && _user?.balance != null) &&
-      _newBalance > _user.balance;
-
-  bool newBalanceIsDifferent() =>
-      (_newBalance != null && _user?.balance != null) &&
-      _newBalance != _user.balance;
-
-  //TODO load indicator
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    loadData();
+    _userFuture = Future(load);
   }
+
+  Future<User> _userFuture;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: _isLoading ? showLoadingIndicator() : _buildContent(),
+      body: FutureBuilder(
+        future: _userFuture,
+        builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+          if (snapshot.hasData) {
+            var user = snapshot.data;
+            _newBalance = user.balance;
+            return _buildContent(user);
+          } else
+            return Center(child: CircularProgressIndicator());
+        },
+      ),
     );
   }
 
-  void loadData() async {
-    //TODO can't call here
-    //final String tagIdAsArg = ModalRoute.of(context).settings.arguments;
-    var apiInstance = UserApi();
-    var userId = "38400000-8cf0-11bd-b23e-10b96e4ef00d";
+  Future<User> load() async {
+    final String userId = ModalRoute.of(context).settings.arguments;
     try {
-      var result = await apiInstance.getUserById(userId);
-      setState(() {
-        _user = result;
-        _newBalance = _user.balance;
-        _isLoading = false;
-      });
-      print(result);
+      var apiInstance = UserApi();
+      User user = await apiInstance.getUserById(userId);
+      return user;
     } catch (e) {
       print("Exception when calling UserApi->getUserById: $e\n");
+      return User();
     }
   }
 
-  void onDone() async {
+  void onDone(User user) async {
     try {
       var apiInstance = UserApi();
-      apiInstance.userRecharge(_user.id, _newBalance - _user.balance);
+      apiInstance.userRecharge(user.id, _newBalance - user.balance);
     } catch (e) {
       print("Exception when calling UserApi->userRecharge: $e\n");
     }
 
-    Navigator.pop(context, "asdf");
+    Navigator.pop(context);
   }
 
   Widget showLoadingIndicator() => Center(
         child: CircularProgressIndicator(),
       );
 
-  Widget _buildContent() {
+  Widget _buildContent(User user) {
     return Stack(children: [
       Container(
         padding: EdgeInsets.all(32),
         child: Align(
           alignment: Alignment.topCenter,
           child: Text(
-            _cardIdDisplay(),
+            "User ID: ${widget.userId}",
             textAlign: TextAlign.center,
           ),
         ),
@@ -100,7 +88,7 @@ class _AdminDetailPageState extends State<AdminDetailPage> {
         children: [
           Center(
             child: Text(
-              _balanceDisplay(),
+              "${_newBalance} €",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 68),
             ),
@@ -118,7 +106,7 @@ class _AdminDetailPageState extends State<AdminDetailPage> {
                   color: Colors.white,
                   iconSize: 64,
                   icon: new Icon(Icons.remove),
-                  onPressed: newBalanceIsHigher()
+                  onPressed: _newBalance > user.balance
                       ? () => setState(() => _newBalance -= 1)
                       : null,
                 ),
@@ -162,7 +150,8 @@ class _AdminDetailPageState extends State<AdminDetailPage> {
                   color: Colors.white,
                 ),
               ),
-              onPressed: newBalanceIsDifferent() ? onDone : null,
+              onPressed:
+                  _newBalance != user.balance ? () => onDone(user) : null,
             ),
           ),
         ),

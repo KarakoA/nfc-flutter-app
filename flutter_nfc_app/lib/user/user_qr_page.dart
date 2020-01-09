@@ -14,7 +14,7 @@ class UserQrPage extends StatefulWidget {
 }
 
 class _UserQrPageState extends State<UserQrPage> {
-  Future<User> _userFuture = Future(Utils.loadPrefsUserFromAPIorDefault);
+  Future<String> _userIdFuture = Future(Utils.loadUserIdFromPreferneces);
 
   @override
   Widget build(BuildContext context) {
@@ -23,8 +23,8 @@ class _UserQrPageState extends State<UserQrPage> {
         title: Text(widget.title),
       ),
       body: FutureBuilder(
-        future: _userFuture,
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
+        future: _userIdFuture,
+        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           if (snapshot.hasData)
             return _buildContent(snapshot.data);
           else
@@ -34,17 +34,17 @@ class _UserQrPageState extends State<UserQrPage> {
     );
   }
 
-  Widget _buildContent(User user) {
+  Widget _buildContent(String userID) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           QrImage(
-            data: user.id,
+            data: userID,
             version: QrVersions.auto,
             size: 300.0,
           ),
-          Text("Email Address"),
+          Text("User ID"),
         ],
       ),
     );

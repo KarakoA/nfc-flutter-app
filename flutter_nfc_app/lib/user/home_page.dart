@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nfc_app/user/list_page.dart';
 import 'package:flutter_nfc_app/user/user_qr_page.dart';
 import 'package:flutter_nfc_app/utils/utils.dart';
+import 'package:hex/hex.dart';
 import 'package:openapi/api.dart';
 import 'package:tuple/tuple.dart';
 
@@ -25,6 +26,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    var data = HEX.decode("12ABCD");
+
+    var a=data.toString();
     _streamController = StreamController();
     load();
     super.initState();
@@ -117,9 +121,10 @@ class _HomePageState extends State<HomePage> {
           child: Stack(
             children: [
               Container(
-                  width:double.infinity,
+                  width: double.infinity,
                   padding: EdgeInsets.all(16),
-                  child: Text("SSV opening hours:\n Tue., Thurs. 20:00-21:00", textAlign: TextAlign.center)),
+                  child: Text("SSV opening hours:\n Tue., Thurs. 20:00-21:00",
+                      textAlign: TextAlign.center)),
               Center(
                 child: Text("${user.balance} €",
                     textAlign: TextAlign.center,

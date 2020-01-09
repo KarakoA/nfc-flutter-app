@@ -1,6 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easy_nfc/flutter_easy_nfc.dart';
+import 'package:flutter_nfc_app/utils/nfc_utils.dart';
+import 'package:nfc_manager/nfc_manager.dart';
+import 'package:nfc_manager/platform_tags.dart';
 import 'package:openapi/api.dart';
 
 import '../widgets/reserve_machine_widget.dart';
@@ -52,8 +56,7 @@ class _ListPageState extends State<ListPage> {
   getEmptyPlaceholder() =>
       Center(child: Text("No available machines at this time."));
 
-  Widget getListView() =>
-      RefreshIndicator(
+  Widget getListView() => RefreshIndicator(
         child: ListView.builder(
             itemCount: items.length,
             itemBuilder: (BuildContext context, int position) {
@@ -65,27 +68,50 @@ class _ListPageState extends State<ListPage> {
   Widget getRow(int i) {
     final currentItem = items[i];
 
-      return new ListTile(
-        title:
-        Text("House ${currentItem.houseNumber}, Machine ${currentItem.name}"),
+    return new ListTile(
+        title: Text(
+            "House ${currentItem.houseNumber}, Machine ${currentItem.name}"),
         leading: Icon(Icons.local_laundry_service, size: 32),
-        trailing: ReserveMachineWidget(machine: currentItem)
-    );
-
+        trailing: ReserveMachineWidget(machine: currentItem));
   }
 
   void onReserve(Machine machine) {}
 
+  void _onTagDiscovered(NfcTag tag) {
+    var a= tag.data;
+    var miFareTag = MiFare.fromTag(tag);
+    //miFareTag
+    if (miFareTag != null) {
+      setState(() {
+        items = [];
+      });
+    }
+  }
+
+  void _onNFCEvent(NfcEvent<BasicTagTechnology> event) {
+    var a = 5;
+  }
+
   Future<void> loadData() async {
     try {
+      var ass = await FlutterEasyNfc.isAvailable();
+      var ass2 = await FlutterEasyNfc.isEnabled();
+
+     // await FlutterEasyNfc.startup();
+   //   FlutterEasyNfc.onNfcEvent(_onNFCEvent);
+     // FlutterEasyNfc.handler(call);
+         var sess = await NfcManager.instance
+            .startTagSession(onDiscovered: _onTagDiscovered);
+
       var apiClient = MachineApi();
       var machines = await apiClient.listAvailableMachines();
       machines.sort((a, b) =>
-      a.houseNumber * 100 + b.name > b.houseNumber * 100 + b.name ? 1 : -1);
+          a.houseNumber * 100 + b.name > b.houseNumber * 100 + b.name ? 1 : -1);
       setState(() {
         items = machines.where((x) => x.type != "Dryer").toList();
       });
     } catch (e) {
+      Scaffold.of(context).showSnackBar(new SnackBar(content: Text(e)));
       setState(() {
         items = [];
       });

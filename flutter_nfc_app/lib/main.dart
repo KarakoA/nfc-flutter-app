@@ -5,7 +5,6 @@ import 'package:flutter_nfc_app/admin/admin_home_page.dart';
 import 'package:flutter_nfc_app/user/home_page.dart';
 import 'package:flutter_nfc_app/login_page.dart';
 import 'package:flutter_nfc_app/user/user_qr_page.dart';
-import 'package:flutter_nfc_app/user/user_page.dart';
 import 'user/list_page.dart';
 
 void main() => runApp(
@@ -13,23 +12,20 @@ void main() => runApp(
         data: (brightness) => new ThemeData(primarySwatch: Colors.lightBlue),
         themedWidgetBuilder: (context, theme) => MaterialApp(
           title: 'Flutter Demo',
-          initialRoute: '/',
+          initialRoute: LoginPage.routeName,
           theme: theme,
           routes: {
-            '/': (BuildContext context) => LoginPage(),
+            LoginPage.routeName: (BuildContext context) => LoginPage(),
             HomePage.routeName: (BuildContext context) =>
                 HomePage(title: 'Aristotelessteig'),
             ListPage.routeName: (BuildContext context) =>
                 new ListPage(title: "Available Machines"),
             AdminHomePage.routeName: (BuildContext context) =>
                 AdminHomePage(title: 'Admin'),
-            //TODO also for others
             AdminDetailPage.routeName: (BuildContext context) =>
                 AdminDetailPage(title: 'Card Details'),
             UserQrPage.routeName: (BuildContext context) =>
                 UserQrPage(title: "QR-Code"),
-            UserPage.routeName: (BuildContext context) =>
-                UserPage(title: "Account"),
           },
         ),
       ),
