@@ -38,18 +38,25 @@ public class NFCUtils {
         try (MifareClassic mifareTag = MifareClassic.get(tag)) {
             mifareTag.connect();
             int sectorIndex = 1;
-            if (mifareTag.authenticateSectorWithKeyA(sectorIndex, MifareClassic.KEY_DEFAULT)) {
 
-                mifareTag.authenticateSectorWithKeyB(sectorIndex, keyB);
-                //change the access bits and key
-                    mifareTag.writeBlock(7, data);
-                if (mifareTag.authenticateSectorWithKeyB(sectorIndex, keyB)) {
-                    //0-th block of sector 1
-                    mifareTag.writeBlock(4, uuid);
-                    Log.i("[NFC-WRITE]", "success");
-                    return true;
-                }
+            //key already written
+            if (mifareTag.authenticateSectorWithKeyB(sectorIndex, keyB)) {
+                //0-th block of sector 1
+                mifareTag.writeBlock(4, uuid);
+                Log.i("[NFC-WRITE]", "success(keyB already written,new uuid)");
+                return true;
             }
+            //not written yet, auth with default key and write
+            else if (mifareTag.authenticateSectorWithKeyA(sectorIndex, keyA)) {
+                //0-th block of sector 1
+                mifareTag.writeBlock(4, uuid);
+                //write key and access bits
+                mifareTag.writeBlock(7, data);
+                Log.i("[NFC-WRITE]", "success(new keyB, new uuid)");
+                return true;
+            } else
+                throw new IllegalArgumentException("Can't authenticate neither with A nor B.");
+
         } catch (IOException e) {
             e.printStackTrace();
             Log.e("[NFC-WRITE-ERROR]", e.getLocalizedMessage());

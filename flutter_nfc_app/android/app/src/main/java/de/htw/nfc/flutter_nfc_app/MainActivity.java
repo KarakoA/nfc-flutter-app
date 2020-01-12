@@ -142,7 +142,7 @@ public class MainActivity extends FlutterActivity {
         processIntent(intent);
     }
 
-    final String keyBHexString = "ABCDEF123456";
+    private final String keyBHexString = "ABCDEF123456";
 
     private void processIntent(Intent intent) {
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction())) {
